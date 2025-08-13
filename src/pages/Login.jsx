@@ -122,6 +122,8 @@ function Login() {
         data
       );
 
+      const { token } = response.data;
+
       if (token) {
         sessionStorage.setItem("token", token);
         Toaster({
