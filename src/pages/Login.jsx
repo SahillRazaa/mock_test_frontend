@@ -12,7 +12,7 @@ const PageContainer = styled.div`
   align-items: center;
   min-height: 100vh;
   background: linear-gradient(135deg,rgb(106, 173, 236),rgb(154, 166, 177));
-  padding: 2rem;
+  // padding: 2rem;
 `;
 
 const FormWrapper = styled.div`
