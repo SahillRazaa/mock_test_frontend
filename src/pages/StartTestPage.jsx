@@ -190,6 +190,7 @@ const StartTestPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(null);
   const timerRef = useRef(null);
+  const [homeModal, setHomeModal] = useState(false);
 
   useEffect(() => {
     const savedData = localStorage.getItem('testData');
@@ -281,6 +282,15 @@ const StartTestPage = () => {
     setShowSubmitModal(false);
   };
 
+  const goHome = () => {
+    sessionStorage.removeItem("testQuestions"); 
+    localStorage.removeItem("testData"); 
+    setHomeModal(false);
+    navigate('/my-test');
+  };
+
+
+
   const getQuestionByIndex = (index) => {
     if (index < (testData.mcqQuestions?.length || 0)) return testData.mcqQuestions[index];
     return testData.codingQuestions[index - (testData.mcqQuestions?.length || 0)];
@@ -368,7 +378,7 @@ const StartTestPage = () => {
           <SubmitButton onClick={handleManualSubmit}>Submit Test</SubmitButton>
         ) : (
           <>
-            <GoGoneButton onClick={() => { sessionStorage.removeItem("testQuestions"); localStorage.removeItem("testData"); navigate('/my-test'); }}>Go Gone</GoGoneButton>
+            <GoGoneButton onClick={() => {setHomeModal(true)}}>Go Gone</GoGoneButton>
             <div style={{ marginTop: '2rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
               <h4>Test Summary</h4>
               <p>MCQ Score: {score?.mcqCorrect || 0}/{score?.mcqTotal || 0}</p>
@@ -394,6 +404,20 @@ const StartTestPage = () => {
             <ButtonGroup>
               <ActionButton onClick={() => setShowSubmitModal(false)}>Cancel</ActionButton>
               <ActionButton primary onClick={submitTest}>Submit</ActionButton>
+            </ButtonGroup>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+      {homeModal && (
+        <ModalOverlay>
+          <ModalContent>
+            <h3 style={{ color: '#1e293b', marginBottom: '1rem' }}>Quit the Test</h3>
+            <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
+              Are you sure you want to quit the test?
+            </p>
+            <ButtonGroup>
+              <StyledButton onClick={() => setHomeModal(false)}>Cancel</StyledButton>
+              <StyledButton primary onClick={goHome}>Confirm</StyledButton>
             </ButtonGroup>
           </ModalContent>
         </ModalOverlay>

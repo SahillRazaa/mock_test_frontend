@@ -253,7 +253,6 @@ function CreateTestPage() {
     setLoading(true);
     try {
       const token = sessionStorage.getItem("token"); 
-      console.log(token);
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/mcqs/topics`,
         {
@@ -299,7 +298,7 @@ function CreateTestPage() {
         ? await fetchSubtopics(topic)
         : null;
       newSelectedTopics[topic] = {
-        time: 15,
+        time: 2,
         subtopics: subtopics ? subtopics.reduce((acc, sub) => ({ ...acc, [sub]: { count: 0 } }), {}) : null,
         count: subtopics ? 0 : 5,
         difficulty: subtopics ? null : 'Medium',
@@ -387,8 +386,6 @@ function CreateTestPage() {
   const handleSubmit = () => {
     const data = prepareDataForBackend();
     localStorage.setItem("testData", JSON.stringify(data));
-    
-    console.log("Data to be sent to backend:", data);
     Toaster({ type: 'success', message: 'Test data saved!' });
     
     navigate("/start-test"); 
@@ -483,19 +480,19 @@ function CreateTestPage() {
     <Section>
       <SectionTitle>Select Coding Problems</SectionTitle>
       <InputGroup>
-        <label>Number of problems (max 4)</label>
+        <label>Number of problems (max 20)</label>
         <StyledInput
           type="number"
           value={codingProblems.length}
           onChange={(e) => {
-            const count = Math.min(parseInt(e.target.value), 4);
+            const count = Math.min(parseInt(e.target.value), 20);
             const newProblems = Array.from({ length: count }, (_, i) => 
               codingProblems[i] || { difficulty: 'Medium', time: 30 }
             );
             setCodingProblems(newProblems);
           }}
           min="0"
-          max="4"
+          max="20"
         />
       </InputGroup>
       {codingProblems.map((problem, index) => (
