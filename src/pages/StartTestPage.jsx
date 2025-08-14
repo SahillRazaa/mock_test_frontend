@@ -132,6 +132,28 @@ const ButtonGroup = styled.div`
   justify-content: flex-end;
 `;
 
+const StyledButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: ${({ primary }) => (primary ? '#3b82f6' : '#64748b')};
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: ${({ fullWidth }) => (fullWidth ? '1' : 'none')};
+  
+  &:hover {
+    background-color: ${({ primary }) => (primary ? '#2563eb' : '#475569')};
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const NavigationButtons = styled.div`
   display: flex;
   gap: 1rem;
@@ -212,25 +234,50 @@ const StartTestPage = () => {
 
   const fetchQuestions = async (data) => {
     const token = sessionStorage.getItem('token');
-
-    if(!token) {
+  
+    if (!token) {
       Toaster({ title: 'Error', type: 'error', message: 'Please Relogin!!' });
       return;
     }
+  
     try {
-      const [mcqResponse, codingResponse] = await Promise.all([
-        axios.post(`${import.meta.env.VITE_API_URL}/api/mcqs`, { queries: data.mcqData.queries }, {
-          headers: {
-            authorization: `Bearer ${token}`
-          }
-        }),
-        axios.post(`${import.meta.env.VITE_API_URL}/api/codings`, { difficulties: data.codingData.difficulties, count: data.codingData.count }, {
-          headers: {
-            authorization: `Bearer ${token}`
-          }
-        })
-      ]);
-      const fullData = { ...data, mcqQuestions: mcqResponse.data, codingQuestions: codingResponse.data };
+      const promises = [];
+
+      if (data.mcqData?.queries?.length > 0) {
+        promises.push(
+          axios.post(
+            `${import.meta.env.VITE_API_URL}/api/mcqs`,
+            { queries: data.mcqData.queries },
+            { headers: { authorization: `Bearer ${token}` } }
+          )
+        );
+      } else {
+        promises.push(Promise.resolve({ data: [] }));
+      }
+  
+      if (data.codingData?.count > 0 && data.codingData?.difficulties?.length > 0) {
+        promises.push(
+          axios.post(
+            `${import.meta.env.VITE_API_URL}/api/codings`,
+            {
+              difficulties: data.codingData.difficulties,
+              count: data.codingData.count
+            },
+            { headers: { authorization: `Bearer ${token}` } }
+          )
+        );
+      } else {
+        promises.push(Promise.resolve({ data: [] }));
+      }
+  
+      const [mcqResponse, codingResponse] = await Promise.all(promises);
+  
+      const fullData = {
+        ...data,
+        mcqQuestions: mcqResponse.data || [],
+        codingQuestions: codingResponse.data || []
+      };
+  
       setTestData(fullData);
       sessionStorage.setItem('testQuestions', JSON.stringify(fullData));
     } catch {
@@ -340,7 +387,7 @@ const StartTestPage = () => {
         <h2>Coding Problems</h2>
         <QuestionSection>
           <h3>Problem {questionNumber}</h3>
-          <div dangerouslySetInnerHTML={{ __html: question.content }} />
+          <div dangerouslySetInnerHTML={{ __html: question.content || <></> }} />
           <p>Difficulty: {question.difficulty}</p>
           <p>Acceptance Rate: {question.acceptance_rate}%</p>
           <a href={`https://leetcode.com/problems/${question.title_slug}`} target="_blank" rel="noopener noreferrer">Solve on LeetCode</a>
